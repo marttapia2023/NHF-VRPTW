@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='utf-8'?>
+<instance>
+    <info>
+        <dataset>Solomon 1987 — Set C1</dataset>
+        <name>C101_005</name>
+    </info>
+    <network>
+        <nodes>
+            <node id="0" type="0">
+                <cx>40.0</cx>
+                <cy>50.0</cy>
+            </node>
+            <node id="1" type="1">
+                <cx>45.0</cx>
+                <cy>68.0</cy>
+            </node>
+            <node id="2" type="1">
+                <cx>45.0</cx>
+                <cy>70.0</cy>
+            </node>
+            <node id="3" type="1">
+                <cx>42.0</cx>
+                <cy>66.0</cy>
+            </node>
+            <node id="4" type="1">
+                <cx>42.0</cx>
+                <cy>68.0</cy>
+            </node>
+            <node id="5" type="1">
+                <cx>42.0</cx>
+                <cy>65.0</cy>
+            </node>
+            </nodes>
+        <euclidean />
+        <decimals>0</decimals>
+    </network>
+    <fleet>
+        <vehicle_profile type="0" number="25">
+            <departure_node>0</departure_node>
+            <arrival_node>0</arrival_node>
+            <capacity>200.0</capacity>
+            <max_travel_time>1236.0</max_travel_time>
+        </vehicle_profile>
+    </fleet>
+    <requests>
+        <request id="1" node="1">
+            <tw>
+                <start>912</start>
+                <end>967</end>
+            </tw>
+            <quantity>10.0</quantity>
+            <service_time>90.0</service_time>
+        </request>
+        <request id="2" node="2">
+            <tw>
+                <start>825</start>
+                <end>870</end>
+            </tw>
+            <quantity>30.0</quantity>
+            <service_time>90.0</service_time>
+        </request>
+        <request id="3" node="3">
+            <tw>
+                <start>65</start>
+                <end>146</end>
+            </tw>
+            <quantity>10.0</quantity>
+            <service_time>90.0</service_time>
+        </request>
+        <request id="4" node="4">
+            <tw>
+                <start>727</start>
+                <end>782</end>
+            </tw>
+            <quantity>10.0</quantity>
+            <service_time>90.0</service_time>
+        </request>
+        <request id="5" node="5">
+            <tw>
+                <start>15</start>
+                <end>67</end>
+            </tw>
+            <quantity>10.0</quantity>
+            <service_time>90.0</service_time>
+        </request>
+        </requests>
+</instance>

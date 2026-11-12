@@ -1,0 +1,45 @@
+{
+  "solver": "gurobi",
+  "instance": "C101_005",
+  "instance_path": "D:\\Universidad\\Optimizacion\\NHF-VRPTW\\Instancias\\Validación inicial\\C101_005.xml",
+  "status": "optimal",
+  "runtime_seconds": 0.09380179999971006,
+  "wall_time_seconds": 0.09380179999971006,
+  "cpu_time_seconds": 0.046875,
+  "solver_runtime_seconds": 0.09200000762939453,
+  "time_limit_seconds": 3600.0,
+  "mip_gap_tolerance": 0.0001,
+  "seed": 42,
+  "threads": 1,
+  "vehicle_types": [
+    {
+      "name": "van",
+      "capacity": 100.0,
+      "fixed_cost": 100.0
+    },
+    {
+      "name": "truck",
+      "capacity": 200.0,
+      "fixed_cost": 180.0
+    }
+  ],
+  "objective": 142.41983891815494,
+  "best_bound": 142.41983891815494,
+  "mip_gap_percent": 0.0,
+  "routes": [
+    {
+      "vehicle_type": "van",
+      "nodes": [
+        0,
+        5,
+        3,
+        4,
+        2,
+        1,
+        0
+      ],
+      "demand": 70.0,
+      "distance": 42.41983891815495
+    }
+  ]
+}
