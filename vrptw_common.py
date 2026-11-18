@@ -116,6 +116,35 @@ def parse_vehicle_types(value: str) -> tuple[VehicleType, ...]:
     return tuple(result)
 
 
+def parse_vehicle_availability(value: str) -> dict[str, int]:
+    result: dict[str, int] = {}
+    for item in value.split(","):
+        fields = item.strip().split(":")
+        if len(fields) != 2 or not fields[0].strip():
+            raise argparse.ArgumentTypeError(
+                "Cada disponibilidad debe tener el formato nombre:cantidad"
+            )
+        name, count_text = fields[0].strip(), fields[1].strip()
+        try:
+            count = int(count_text)
+        except ValueError as exc:
+            raise argparse.ArgumentTypeError(
+                f"La cantidad disponible debe ser un entero no negativo: {item}"
+            ) from exc
+        if count < 0:
+            raise argparse.ArgumentTypeError(
+                f"La cantidad disponible debe ser un entero no negativo: {item}"
+            )
+        if name in result:
+            raise argparse.ArgumentTypeError(
+                f"Disponibilidad repetida para el tipo de vehículo {name}"
+            )
+        result[name] = count
+    if not result:
+        raise argparse.ArgumentTypeError("Debe indicarse al menos un tipo de vehículo")
+    return result
+
+
 def load_instance(path: Path, service_time_scale: float = 1.0) -> Instance:
     if not math.isfinite(service_time_scale) or service_time_scale <= 0:
         raise ValueError("service_time_scale debe ser un número positivo")
@@ -195,7 +224,11 @@ def load_instance(path: Path, service_time_scale: float = 1.0) -> Instance:
     )
 
 
-def build_model(instance: Instance, vehicle_types: tuple[VehicleType, ...]) -> ModelSpec:
+def build_model(
+    instance: Instance,
+    vehicle_types: tuple[VehicleType, ...],
+    vehicle_availability: dict[str, int] | None = None,
+) -> ModelSpec:
     variables: list[Variable] = []
     constraints: list[Constraint] = []
     arc_variables: dict[tuple[int, int, int], str] = {}
@@ -261,7 +294,18 @@ def build_model(instance: Instance, vehicle_types: tuple[VehicleType, ...]) -> M
 
         fleet_name = f"y_{k}"
         fleet_variables[k] = fleet_name
-        add_variable(fleet_name, 0, instance.fleet_size, "I", vehicle.fixed_cost)
+        available = (
+            vehicle_availability.get(vehicle.name, instance.fleet_size)
+            if vehicle_availability is not None
+            else instance.fleet_size
+        )
+        add_variable(
+            fleet_name,
+            0,
+            min(instance.fleet_size, available),
+            "I",
+            vehicle.fixed_cost,
+        )
 
     for customer in customers:
         node = customer.node
@@ -360,6 +404,15 @@ def add_common_arguments(parser: argparse.ArgumentParser, solver: str) -> None:
             f"(default: {DEFAULT_VEHICLE_TYPES})"
         ),
     )
+    parser.add_argument(
+        "--vehicle-availability",
+        type=parse_vehicle_availability,
+        metavar="DISPONIBILIDAD",
+        help=(
+            "Máximo disponible por tipo, con formato nombre:cantidad y "
+            "separados por comas; al usarlo, debe incluir todos los tipos"
+        ),
+    )
     parser.add_argument("--time-limit", type=float, default=3600, help="Límite de tiempo en segundos (default: 3600)")
     parser.add_argument("--mip-gap", type=float, default=1e-4, help="Tolerancia relativa MIP (default: 0.0001)")
     parser.add_argument("--seed", type=int, default=42, help="Semilla aleatoria")
@@ -384,6 +437,21 @@ def validate_arguments(args: argparse.Namespace) -> None:
         raise ValueError("--mip-gap debe estar entre 0 (inclusive) y 1 (exclusive)")
     if args.threads < 0:
         raise ValueError("--threads no puede ser negativo")
+    if args.vehicle_availability is not None:
+        vehicle_names = {vehicle.name for vehicle in args.vehicle_types}
+        availability_names = set(args.vehicle_availability)
+        if availability_names != vehicle_names:
+            missing = sorted(vehicle_names - availability_names)
+            extra = sorted(availability_names - vehicle_names)
+            details = []
+            if missing:
+                details.append(f"faltan tipos: {', '.join(missing)}")
+            if extra:
+                details.append(f"tipos desconocidos: {', '.join(extra)}")
+            raise ValueError(
+                "--vehicle-availability debe incluir exactamente los tipos "
+                "definidos en --vehicle-types (" + "; ".join(details) + ")"
+            )
 
 
 def extract_routes(

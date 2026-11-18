@@ -54,6 +54,22 @@ python gurobi_vrptw.py --instance "Instancias\Solomon\solomon-1987-c1\C101_025.x
 python cplex_vrptw.py --instance "Instancias\Solomon\solomon-1987-c1\C101_025.xml" --time-limit 3600 --seed 42 --mip-gap 0.0001
 ```
 
+Por defecto, el tamaño total de la flota se toma del XML y cada tipo puede
+usar hasta ese máximo. Para limitar la disponibilidad por tipo, agregue
+`--vehicle-availability` con una cantidad entera no negativa para cada tipo:
+
+```powershell
+python gurobi_vrptw.py --instance "Instancias\Solomon\solomon-1987-c1\C101_025.xml" --vehicle-types "furgon:80:70:0.8,camion:200:180:1.35" --vehicle-availability "furgon:10,camion:15"
+python cplex_vrptw.py --instance "Instancias\Solomon\solomon-1987-c1\C101_025.xml" --vehicle-types "furgon:80:70:0.8,camion:200:180:1.35" --vehicle-availability "furgon:10,camion:15"
+```
+
+En este ejemplo se pueden usar como máximo 10 furgones y 15 camiones; además,
+la suma de los vehículos usados sigue limitada por el `number` del XML (25 en
+esta instancia). Si no se proporciona la opción, se conserva el comportamiento
+anterior. Al especificarla, se deben incluir todos los tipos definidos en
+`--vehicle-types`, incluidos los que tengan disponibilidad cero. Los JSON
+registran las cantidades disponibles y las realmente utilizadas por tipo.
+
 Configure otros tipos de flota con el formato
 `nombre:capacidad:costo_fijo:costo_por_unidad_de_distancia`, separados por
 comas:

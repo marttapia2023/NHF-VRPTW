@@ -34,7 +34,7 @@ def main() -> int:
         print("No se encontró cplex. Instale la API oficial de IBM CPLEX.", file=sys.stderr)
         return 2
 
-    spec = build_model(instance, args.vehicle_types)
+    spec = build_model(instance, args.vehicle_types, args.vehicle_availability)
     model = cplex.Cplex()
     model.set_problem_name(f"heterogeneous_vrptw_{instance.name}")
     model.objective.set_sense(model.objective.sense.minimize)
@@ -84,6 +84,7 @@ def main() -> int:
     bound_available = "infeasible" not in status_text.lower() and "unbounded" not in status_text.lower()
     best_bound = model.solution.MIP.get_best_objective() if bound_available else None
     mip_gap = model.solution.MIP.get_mip_relative_gap() if has_solution else None
+    routes = extract_routes(instance, args.vehicle_types, spec, value_map) if has_solution else []
     result = {
         "solver": "cplex",
         "instance": instance.name,
@@ -97,19 +98,27 @@ def main() -> int:
         "mip_gap_tolerance": args.mip_gap,
         "seed": args.seed,
         "threads": args.threads,
+        "total_fleet_limit": instance.fleet_size,
+        "vehicle_availability_configured": args.vehicle_availability is not None,
         "vehicle_types": [
             {
                 "name": vehicle.name,
                 "capacity": vehicle.capacity,
                 "fixed_cost": vehicle.fixed_cost,
                 "distance_cost_per_unit": vehicle.distance_cost,
+                "available_count": (
+                    args.vehicle_availability[vehicle.name]
+                    if args.vehicle_availability is not None
+                    else None
+                ),
+                "used_count": sum(route["vehicle_type"] == vehicle.name for route in routes),
             }
             for vehicle in args.vehicle_types
         ],
         "objective": model.solution.get_objective_value() if has_solution else None,
         "best_bound": finite_or_none(best_bound) if best_bound is not None else None,
         "mip_gap_percent": mip_gap * 100 if mip_gap is not None else None,
-        "routes": extract_routes(instance, args.vehicle_types, spec, value_map) if has_solution else [],
+        "routes": routes,
     }
     output = args.output or Path("Resultados") / "CPLEX" / f"{instance.name}.json"
     save_result(output, result)
