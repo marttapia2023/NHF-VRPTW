@@ -3,10 +3,10 @@
   "instance": "C101_005",
   "instance_path": "D:\\Universidad\\Optimizacion\\NHF-VRPTW\\Instancias\\Validación inicial\\C101_005.xml",
   "status": "integer optimal solution",
-  "runtime_seconds": 0.1022993000005954,
-  "wall_time_seconds": 0.1022993000005954,
-  "cpu_time_seconds": 0.046875,
-  "solver_runtime_seconds": 0.1022993000005954,
+  "runtime_seconds": 0.035390799999731826,
+  "wall_time_seconds": 0.035390799999731826,
+  "cpu_time_seconds": 0.03125,
+  "solver_runtime_seconds": 0.035390799999731826,
   "time_limit_seconds": 3600.0,
   "mip_gap_tolerance": 0.0001,
   "seed": 42,
@@ -15,12 +15,14 @@
     {
       "name": "van",
       "capacity": 100.0,
-      "fixed_cost": 100.0
+      "fixed_cost": 100.0,
+      "distance_cost_per_unit": 1.0
     },
     {
       "name": "truck",
       "capacity": 200.0,
-      "fixed_cost": 180.0
+      "fixed_cost": 180.0,
+      "distance_cost_per_unit": 1.0
     }
   ],
   "objective": 142.41983891815494,
@@ -39,7 +41,10 @@
         0
       ],
       "demand": 70.0,
-      "distance": 42.41983891815495
+      "distance": 42.41983891815495,
+      "distance_cost_per_unit": 1.0,
+      "travel_cost": 42.41983891815495,
+      "fixed_cost": 100.0
     }
   ]
 }

@@ -19,14 +19,17 @@ Solomon no proporciona costos fijos ni capacidades para una flota heterogénea.
 Por ello, los valores predeterminados son un escenario configurable para el
 proyecto:
 
-| Tipo predeterminado | Capacidad | Costo fijo |
-|---|---:|---:|
-| van | 100 | 100 |
-| truck | 200 | 180 |
+| Tipo predeterminado | Capacidad | Costo fijo | Costo por distancia |
+|---|---:|---:|---:|
+| van | 100 | 100 | 1 |
+| truck | 200 | 180 | 1 |
 
-El costo de distancia es 1 por unidad para todos los tipos. Ajuste los costos y
-capacidades con los datos de la organización o con el escenario que el equipo
-documente en su informe.
+El cuarto parámetro permite diferenciar el costo por unidad de distancia de
+cada tipo. El objetivo es `suma_k (costo_fijo_k * vehículos_usados_k) + suma_kij
+(costo_distancia_k * distancia_ij * x_kij)`. El valor 1 conserva el
+comportamiento anterior, donde una unidad de distancia cuesta lo mismo para
+todos los camiones. Ajuste capacidades y costos con datos de la organización o
+con el escenario que el equipo documente en su informe.
 
 ## Requisitos
 
@@ -52,11 +55,17 @@ python cplex_vrptw.py --instance "Instancias\Solomon\solomon-1987-c1\C101_025.xm
 ```
 
 Configure otros tipos de flota con el formato
-`nombre:capacidad:costo_fijo`, separados por comas:
+`nombre:capacidad:costo_fijo:costo_por_unidad_de_distancia`, separados por
+comas:
 
 ```powershell
-python gurobi_vrptw.py --instance "Instancias\Solomon\solomon-1987-c1\C101_025.xml" --vehicle-types "furgon:80:70,camion:200:180"
+python gurobi_vrptw.py --instance "Instancias\Solomon\solomon-1987-c1\C101_025.xml" --vehicle-types "furgon:80:70:0.8,camion:200:180:1.35"
 ```
+
+El costo por distancia es opcional: el formato anterior de tres campos
+`nombre:capacidad:costo_fijo` sigue siendo válido y asume costo unitario 1.
+Use los mismos valores de `--vehicle-types` al comparar Gurobi y CPLEX. Los
+JSON registran el costo unitario de cada tipo y el costo de viaje de cada ruta.
 
 Ambos programas usan por defecto un límite de 3600 segundos, semilla 42,
 brecha MIP relativa de 0.0001 y todos los hilos disponibles. La instancia y

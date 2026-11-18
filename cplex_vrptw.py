@@ -98,7 +98,12 @@ def main() -> int:
         "seed": args.seed,
         "threads": args.threads,
         "vehicle_types": [
-            {"name": vehicle.name, "capacity": vehicle.capacity, "fixed_cost": vehicle.fixed_cost}
+            {
+                "name": vehicle.name,
+                "capacity": vehicle.capacity,
+                "fixed_cost": vehicle.fixed_cost,
+                "distance_cost_per_unit": vehicle.distance_cost,
+            }
             for vehicle in args.vehicle_types
         ],
         "objective": model.solution.get_objective_value() if has_solution else None,

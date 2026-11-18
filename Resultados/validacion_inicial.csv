@@ -1,3 +1,3 @@
-instancia,solver,estado,objetivo,cota,gap_porcentual,tiempo_pared_segundos,tiempo_cpu_segundos,limite_segundos,semilla,hilos,clientes_visitados,rutas,carga_maxima,capacidad
-C101_005,gurobi,optimal,142.41983891815494,142.41983891815494,0.0,0.0938018,0.046875,3600,42,1,5,1,70,100
-C101_005,cplex,integer optimal solution,142.41983891815494,142.41983891815497,0.0,0.1022993,0.046875,3600,42,1,5,1,70,100
+instancia,solver,estado,objetivo,cota,gap_porcentual,tiempo_pared_segundos,tiempo_cpu_segundos,limite_segundos,semilla,hilos,clientes_visitados,rutas,carga_maxima,capacidad,costo_distancia_por_unidad
+C101_005,gurobi,optimal,142.41983891815494,142.41983891815494,0.0,0.0155305,0.015625,3600,42,1,5,1,70,100,1
+C101_005,cplex,integer optimal solution,142.41983891815494,142.41983891815497,0.0,0.0353908,0.03125,3600,42,1,5,1,70,100,1

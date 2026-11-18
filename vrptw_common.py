@@ -16,6 +16,7 @@ class VehicleType:
     name: str
     capacity: float
     fixed_cost: float
+    distance_cost: float
 
 
 @dataclass(frozen=True)
@@ -73,24 +74,27 @@ class ModelSpec:
     fleet_variables: dict[int, str]
 
 
-DEFAULT_VEHICLE_TYPES = "van:100:100,truck:200:180"
+DEFAULT_VEHICLE_TYPES = "van:100:100:1,truck:200:180:1"
 
 
 def parse_vehicle_types(value: str) -> tuple[VehicleType, ...]:
     result: list[VehicleType] = []
     for item in value.split(","):
         fields = item.strip().split(":")
-        if len(fields) != 3:
+        if len(fields) not in (3, 4):
             raise argparse.ArgumentTypeError(
-                "Cada tipo debe tener el formato nombre:capacidad:costo_fijo"
+                "Cada tipo debe tener el formato "
+                "nombre:capacidad:costo_fijo[:costo_por_distancia]"
             )
-        name, capacity_text, cost_text = fields
+        name, capacity_text, fixed_cost_text = fields[:3]
+        distance_cost_text = fields[3] if len(fields) == 4 else "1"
         try:
             capacity = float(capacity_text)
-            fixed_cost = float(cost_text)
+            fixed_cost = float(fixed_cost_text)
+            distance_cost = float(distance_cost_text)
         except ValueError as exc:
             raise argparse.ArgumentTypeError(
-                f"Capacidad y costo deben ser números: {item}"
+                f"Capacidad y costos deben ser números: {item}"
             ) from exc
         if not name or not math.isfinite(capacity) or capacity <= 0:
             raise argparse.ArgumentTypeError(
@@ -100,7 +104,11 @@ def parse_vehicle_types(value: str) -> tuple[VehicleType, ...]:
             raise argparse.ArgumentTypeError(
                 f"El costo fijo debe ser un número no negativo: {item}"
             )
-        result.append(VehicleType(name, capacity, fixed_cost))
+        if not math.isfinite(distance_cost) or distance_cost < 0:
+            raise argparse.ArgumentTypeError(
+                f"El costo por unidad de distancia debe ser un número no negativo: {item}"
+            )
+        result.append(VehicleType(name, capacity, fixed_cost, distance_cost))
     if not result:
         raise argparse.ArgumentTypeError("Debe especificarse al menos un tipo de vehículo")
     if len({vehicle.name for vehicle in result}) != len(result):
@@ -230,7 +238,7 @@ def build_model(instance: Instance, vehicle_types: tuple[VehicleType, ...]) -> M
                     0,
                     1,
                     "B",
-                    instance.distances[i, j],
+                    instance.distances[i, j] * vehicle.distance_cost,
                 )
                 inbound.setdefault((k, j), []).append(name)
                 outbound.setdefault((k, i), []).append(name)
@@ -347,7 +355,8 @@ def add_common_arguments(parser: argparse.ArgumentParser, solver: str) -> None:
         default=parse_vehicle_types(DEFAULT_VEHICLE_TYPES),
         metavar="TIPOS",
         help=(
-            "Tipos en formato nombre:capacidad:costo_fijo separados por comas "
+            "Tipos en formato nombre:capacidad:costo_fijo:costo_distancia "
+            "separados por comas "
             f"(default: {DEFAULT_VEHICLE_TYPES})"
         ),
     )
@@ -413,6 +422,10 @@ def extract_routes(
                     "distance": sum(
                         instance.distances[i, j] for i, j in zip(route, route[1:])
                     ),
+                    "distance_cost_per_unit": vehicle.distance_cost,
+                    "travel_cost": vehicle.distance_cost
+                    * sum(instance.distances[i, j] for i, j in zip(route, route[1:])),
+                    "fixed_cost": vehicle.fixed_cost,
                 }
             )
     return routes
